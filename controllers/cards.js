@@ -3,7 +3,7 @@ const Card = require('../models/card');
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: 'Ошибка сервера' }));
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 const createCard = (req, res) => {
@@ -19,7 +19,7 @@ const createCard = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -36,7 +36,7 @@ const deleteCard = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -57,7 +57,7 @@ const likeCard = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -78,7 +78,7 @@ const dislikeCard = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 

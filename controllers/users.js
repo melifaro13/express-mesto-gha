@@ -3,7 +3,7 @@ const User = require('../models/user');
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'Ошибка сервера' }));
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 const getUser = (req, res) => {
@@ -20,7 +20,7 @@ const getUser = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -35,7 +35,7 @@ const createUser = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -57,7 +57,7 @@ const updateUser = (req, res) => {
         res.status(400).send({ message: 'Неверные данные' });
         return;
       }
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -75,7 +75,7 @@ const updateAvatar = (req, res) => {
       return res.send(user);
     })
     .catch(() => {
-      res.status(500).send({ message: 'Произошла ошибка' });
+      res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 }
 
