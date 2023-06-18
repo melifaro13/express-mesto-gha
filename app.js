@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 const routes = require('./routes/index');
-const { createUser, login } = require('./controllers/users');
+const { login, createUser } = require('./controllers/users');
 const { validationLogin, validationCreateUser } = require('./middlewares/validations');
 const auth = require('./middlewares/auth');
 const handleError = require('./middlewares/handleError');
@@ -19,6 +19,11 @@ app.use(cookieParser());
 app.post('/signin', validationLogin, login);
 app.post('/signup', validationCreateUser, createUser);
 
+app.use(auth);
+app.use(routes);
+app.use(errors());
+app.use(handleError);
+
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -29,14 +34,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
     console.log('Не удалось подключиться к БД');
 });
 
-app.use(auth);
-app.use(routes);
-app.use(errors());
-app.use(handleError);
-
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-});
+// app.use('*', (req, res) => {
+//   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+// });
 
 app.listen(PORT, () => {
   console.log(`Сервер запущен на ${PORT} порту`);
