@@ -30,23 +30,62 @@ const getUser = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
-  bcrypt.hash(password, 10)
-  .then ((hash) => User.create({
-  name, about, avatar, email, password: hash }))
-    .then((user) => {
-      res.send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError('Неверные данные');
-      } else if (err.code === 11000) {
-        throw new ConflictError('Пользователь с таким email уже существует');
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
+
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
+        throw new ConflictError(
+          'Пользователь с таким email уже зарегистрирован',
+        );
       }
-      throw err;
-    })
-    .catch(next);
+
+      bcrypt
+        .hash(password, 10)
+        .then((hash) => User.create({
+          name,
+          about,
+          avatar,
+          email,
+          password: hash,
+        }))
+        .then((user) => {
+          res.send(formatUser(user));
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            throw new BadRequestError('Предоставлены некорректные данные');
+          }
+          throw err;
+        })
+        .catch(next);
+    }).catch(next);
 };
+
+// const createUser = (req, res, next) => {
+//   const { name, about, avatar, email, password } = req.body;
+//   bcrypt.hash(password, 10)
+//   .then ((hash) => User.create({
+//   name, about, avatar, email, password: hash }))
+//     .then((user) => {
+//       res.send(user);
+//     })
+//     .catch((err) => {
+//       if (err.name === 'ValidationError') {
+//         throw new BadRequestError('Неверные данные');
+//       } else if (err.code === 11000) {
+//         throw new ConflictError('Пользователь с таким email уже существует');
+//       }
+//       throw err;
+//     })
+//     .catch(next);
+// };
 
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
