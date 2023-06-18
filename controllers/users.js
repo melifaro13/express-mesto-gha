@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
+const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -141,7 +142,10 @@ const login = (req, res, next) => {
       maxAge: 3600000 * 24 * 7,
       httpOnly: true,
       sameSite: true
-    });
+    })
+    .catch((err) => {
+      throw new AuthError(`Ошибка авторизации: ${err.message}`);
+    })
   })
   .catch(next);
 }
