@@ -1,13 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 const routes = require('./routes/index');
+const { createUser, login } = require('./controllers/users');
+const { validationLogin, validationCreateUser } = require('./middlewares/validations');
+const auth = require('./middlewares/auth');
+const handleError = require('./middlewares/handleError');
 
 const app = express();
 const { PORT = 3000 } = process.env;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+app.post('/signin', validationLogin, login);
+app.post('/signup', validationCreateUser, createUser);
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -19,14 +29,10 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
     console.log('Не удалось подключиться к БД');
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6485b9952c4cc605f0953c68'
-  };
-  next();
-});
-
+app.use(auth);
 app.use(routes);
+app.use(errors());
+app.use(handleError);
 
 app.use('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });

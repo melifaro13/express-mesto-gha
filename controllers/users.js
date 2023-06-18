@@ -1,45 +1,54 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const NotFoundError = require('../errors/NotFoundError');
+const BadRequestError = require('../errors/BadRequestError');
+const ConflictError = require('../errors/ConflictError');
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 };
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   const { userId } = req.params;
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не обнаружен' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Неверные данные' });
-        return;
+        throw new BadRequestError('Неверные данные');
       }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
-}
+      throw err;
+    })
+    .catch(next);
+};
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+const createUser = (req, res, next) => {
+  const { name, about, avatar, email } = req.body;
+  bcrypt.hash(req.body.password, 10)
+  .then ((hash) => User.create({
+  name, about, avatar, email, password: hash }))
     .then((user) => {
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Неверные данные' });
-        return;
+        throw new BadRequestError('Неверные данные');
+      } else if (err.code === 11000) {
+        throw new ConflictError('Пользователь с таким email уже существует');
       }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+      throw err;
+    })
+    .catch(next);
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -48,20 +57,20 @@ const updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Неверные данные' });
-        return;
+        throw new BadRequestError('Неверные данные');
       }
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+      throw err;
+    })
+    .catch(next);
 }
 
-const updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -70,13 +79,48 @@ const updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.send(user);
     })
-    .catch(() => {
-      res.status(500).send({ message: 'На сервере произошла ошибка' });
-    });
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError('Неверные данные');
+      }
+      throw err;
+    })
+    .catch(next);
 }
 
-module.exports = { getUsers, getUser, createUser, updateUser, updateAvatar };
+const getCurrentUser = (req, res, next) => {
+  const { userId } = req.params;
+  User.findById(userId)
+  .then((user) => {
+    if (!user) {
+      throw new NotFoundError('Пользователь не найден');
+    }
+    return res.send(user);
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      throw new BadRequestError('Неверные данные');
+    }
+    throw err;
+  })
+  .catch(next);
+}
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+  .then((user) => {
+    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+    res.cookie('jwt', token, {
+      maxAge: 3600000 * 24 * 7,
+      httpOnly: true
+    });
+  })
+  .catch(next);
+}
+
+module.exports = { getUsers, getUser, createUser, updateUser, updateAvatar, getCurrentUser, login };
