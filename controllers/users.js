@@ -53,25 +53,6 @@ const createUser = (req, res, next) => {
     }).catch(next);
 };
 
-// const createUser = (req, res, next) => {
-//   const { name, about, avatar, email, password } = req.body;
-//   bcrypt.hash(password, 10)
-//   .then ((hash) => User.create({
-//   name, about, avatar, email, password: hash }))
-//     .then((user) => {
-//       res.send(user);
-//     })
-//     .catch((err) => {
-//       if (err.name === 'ValidationError') {
-//         throw new BadRequestError('Неверные данные');
-//       } else if (err.code === 11000) {
-//         throw new ConflictError('Пользователь с таким email уже существует');
-//       }
-//       throw err;
-//     })
-//     .catch(next);
-// };
-
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
@@ -144,9 +125,10 @@ const login = (req, res, next) => {
       httpOnly: true,
       sameSite: true
     })
+    .send({ message: 'Авторизация прошла успешно' });
+    })
     .catch((err) => {
       throw new AuthError(`Ошибка авторизации: ${err.message}`);
-    })
   })
   .catch(next);
 }
