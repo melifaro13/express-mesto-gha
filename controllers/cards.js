@@ -19,31 +19,38 @@ const createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Предоставлены некорректные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err);
       }
-      throw err;
     })
-    .catch(next);
 };
+
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
-  Card.findByIdAndRemove(cardId)
+  Card.findById(cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
       } else if (card.owner.toString() !== req.user._id) {
         throw new ForbiddenError('Удаление невозможно');
       }
-      return res.send(card);
+      return Card.findByIdAndRemove(cardId);
+    })
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Карточка не найдена');
+      }
+      res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Предоставлены некорректные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err);
       }
-      throw err;
-    })
-    .catch(next);
+    });
 };
 
 const likeCard = (req, res, next) => {
@@ -60,11 +67,11 @@ const likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Неверные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err);
       }
-      throw err;
     })
-    .catch(next);
 };
 
 const dislikeCard = (req, res, next) => {
@@ -81,11 +88,11 @@ const dislikeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Неверные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err);
       }
-      throw err;
     })
-    .catch(next);
 };
 
 module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };

@@ -9,7 +9,7 @@ const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send(users.map(formatUser)))
+    .then((users) => res.send(users))
     .catch(next);
 };
 
@@ -24,11 +24,11 @@ const getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Неверные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err);
       }
-      throw err;
     })
-    .catch(next);
 };
 
 const createUser = (req, res, next) => {
@@ -45,11 +45,11 @@ const createUser = (req, res, next) => {
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
-            throw new BadRequestError('Предоставлены некорректные данные');
+            next(new BadRequestError('Предоставлены некорректные данные'));
+          } else {
+            next(err);
           }
-          throw err;
         })
-        .catch(next);
     }).catch(next);
 };
 
@@ -68,11 +68,11 @@ const updateUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Неверные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err)
       }
-      throw err;
     })
-    .catch(next);
 }
 
 const updateAvatar = (req, res, next) => {
@@ -90,11 +90,11 @@ const updateAvatar = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Неверные данные');
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err)
       }
-      throw err;
     })
-    .catch(next);
 }
 
 const getCurrentUser = (req, res, next) => {
@@ -107,11 +107,11 @@ const getCurrentUser = (req, res, next) => {
   })
   .catch((err) => {
     if (err.name === 'CastError') {
-      throw new BadRequestError('Неверные данные');
+      next(new BadRequestError('Предоставлены некорректные данные'));
+    } else {
+      next(err)
     }
-    throw err;
   })
-  .catch(next);
 }
 
 const login = (req, res, next) => {
@@ -127,9 +127,8 @@ const login = (req, res, next) => {
     .send({ message: 'Авторизация прошла успешно' });
     })
     .catch((err) => {
-      throw new AuthError(`Ошибка авторизации: ${err.message}`);
+      next(new AuthError(`Ошибка авторизации: ${err.message}`));
   })
-  .catch(next);
 }
 
 module.exports = { getUsers, getUser, createUser, updateUser, updateAvatar, getCurrentUser, login };

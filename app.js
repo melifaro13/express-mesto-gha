@@ -9,6 +9,7 @@ const { validationLogin, validationCreateUser } = require('./middlewares/validat
 const auth = require('./middlewares/auth');
 const extractJwt = require('./middlewares/extractJwt');
 const handleError = require('./middlewares/handleError');
+const NotFoundDocumentError = require('./errors/NotFoundDocumentError');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -34,9 +35,7 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
     console.log('Не удалось подключиться к БД');
 });
 
-app.use('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-});
+app.use('*', NotFoundDocumentError);
 
 app.use(errors());
 app.use(handleError);
