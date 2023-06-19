@@ -19,7 +19,7 @@ const createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Неверные данные');
+        throw new BadRequestError(err.message);
       }
       throw err;
     })
