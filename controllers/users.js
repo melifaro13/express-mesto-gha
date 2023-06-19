@@ -98,22 +98,15 @@ const updateAvatar = (req, res, next) => {
 }
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.params;
-  User.findById(userId)
-  .then((user) => {
-    if (!user) {
-      throw new NotFoundError('Пользователь не найден');
-    }
-    return res.send(formatUser(user));
-  })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      throw new BadRequestError('Неверные данные');
-    }
-    throw err;
-  })
-  .catch(next);
-}
+  User.findOne({ _id: req.user._id })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Запрашиваемый пользователь не найден');
+      }
+      res.send(formatUser(user));
+    })
+    .catch(next);
+};
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
