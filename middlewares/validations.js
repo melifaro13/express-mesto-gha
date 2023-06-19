@@ -1,14 +1,4 @@
 const { celebrate, Joi } = require('celebrate');
-const BadRequestError = require('../errors/BadRequestError');
-
-const isURL = /^(https?:\/\/)(www\.)?(?!-)[-a-zA-Z0-9@:%._~#=]{1,249}(?<!-)\.[A-Za-z]{2,6}([-a-zA-Z0-9._~:/?#[\]@!$&'()*+,;=]*)#?$/;
-
-const validationUrl = (v) => {
-  if (isURL.test(v)) {
-    return v;
-  }
-  throw new BadRequestError('Неверный адрес URL');
-};
 
 const validationLogin = celebrate({
   body: Joi.object().keys({
@@ -59,4 +49,4 @@ const validationCardId = celebrate({
   }),
 });
 
-module.exports = { isURL, validationLogin, validationCreateUser, validationUpdateUser,validationUpdateAvatar, validationUserId, validationCreateCard, validationCardId };
+module.exports = { validationLogin, validationCreateUser, validationUpdateUser,validationUpdateAvatar, validationUserId, validationCreateCard, validationCardId };

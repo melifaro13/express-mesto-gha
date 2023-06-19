@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { formatUser } = require('../utils/formatUser');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
@@ -8,7 +9,7 @@ const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send(users))
+    .then((users) => res.send(users.map(formatUser)))
     .catch(next);
 };
 
@@ -19,7 +20,7 @@ const getUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      return res.send(user);
+      return res.send(formatUser(user));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -40,7 +41,7 @@ const createUser = (req, res, next) => {
       bcrypt.hash(password, 10)
         .then((hash) => User.create({ name, about, avatar, email, password: hash }))
         .then((user) => {
-          res.send(user);
+          res.send(formatUser(user));
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
@@ -82,7 +83,7 @@ const updateUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      return res.send(user);
+      return res.send(formatUser(user));
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -104,7 +105,7 @@ const updateAvatar = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Пользователь не найден');
       }
-      return res.send(user);
+      return res.send(formatUser(user));
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -122,7 +123,7 @@ const getCurrentUser = (req, res, next) => {
     if (!user) {
       throw new NotFoundError('Пользователь не найден');
     }
-    return res.send(user);
+    return res.send(formatUser(user));
   })
   .catch((err) => {
     if (err.name === 'CastError') {
