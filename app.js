@@ -23,8 +23,6 @@ app.post('/signup', validationCreateUser, createUser);
 
 app.use(auth);
 app.use(routes);
-app.use(errors());
-app.use(handleError);
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useNewUrlParser: true,
@@ -36,9 +34,12 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
     console.log('Не удалось подключиться к БД');
 });
 
-// app.use('*', (req, res) => {
-//   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
-// });
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+});
+
+app.use(errors());
+app.use(handleError);
 
 app.listen(PORT, () => {
   console.log(`Сервер запущен на ${PORT} порту`);

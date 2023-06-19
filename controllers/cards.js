@@ -32,14 +32,14 @@ const deleteCard = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
+      } else if (card.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Удаление невозможно');
       }
       return res.send(card);
     })
-    .then((card) => {
-      if (card.owner.toString() === req.user._id) {
-        Card.findByIdAndRemove(cardId).then(() => res.send(card));
-      } else {
-        throw new ForbiddenError('Удаление невозможно');
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        throw new BadRequestError('Предоставлены некорректные данные');
       }
       throw err;
     })
