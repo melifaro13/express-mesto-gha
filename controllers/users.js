@@ -5,7 +5,6 @@ const { formatUser } = require('../utils/formatUser');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
-const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -52,8 +51,8 @@ const createUser = (req, res, next) => {
           email,
           password: hash,
         }))
-        .then(() => {
-          res.send(formatUser(user));
+        .then((us) => {
+          res.send(formatUser(us));
         })
         .catch((err) => {
           if (err.name === 'ValidationError') {
@@ -139,7 +138,7 @@ const login = (req, res, next) => {
         .send({ message: 'Авторизация прошла успешно' });
     })
     .catch((err) => {
-      next(new AuthError(`Ошибка авторизации: ${err.message}`));
+      next(err);
     });
 };
 
