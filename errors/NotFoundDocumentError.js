@@ -1,4 +1,4 @@
-const NotFoundError = require('../errors/NotFoundError');
+const NotFoundError = require('./NotFoundError');
 
 module.exports = (req, res, next) => {
   const err = new NotFoundError('Запрашиваемый ресурс не найден');

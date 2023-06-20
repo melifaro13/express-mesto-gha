@@ -23,9 +23,8 @@ const createCard = (req, res, next) => {
       } else {
         next(err);
       }
-    })
+    });
 };
-
 
 const deleteCard = (req, res, next) => {
   const { cardId } = req.params;
@@ -58,7 +57,7 @@ const likeCard = (req, res, next) => {
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
-    )
+  )
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
@@ -71,7 +70,7 @@ const likeCard = (req, res, next) => {
       } else {
         next(err);
       }
-    })
+    });
 };
 
 const dislikeCard = (req, res, next) => {
@@ -79,7 +78,7 @@ const dislikeCard = (req, res, next) => {
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
-    )
+  )
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Карточка не найдена');
@@ -92,7 +91,13 @@ const dislikeCard = (req, res, next) => {
       } else {
         next(err);
       }
-    })
+    });
 };
 
-module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };
+module.exports = {
+  getCards,
+  createCard,
+  deleteCard,
+  likeCard,
+  dislikeCard,
+};

@@ -30,9 +30,9 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
   family: 4,
 }).then(() => {
-    console.log('Подключение к БД')
+  console.log('Подключение к БД');
 }).catch(() => {
-    console.log('Не удалось подключиться к БД');
+  console.log('Не удалось подключиться к БД');
 });
 
 app.use('*', NotFoundDocumentError);

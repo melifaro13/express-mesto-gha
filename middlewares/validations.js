@@ -49,4 +49,12 @@ const validationCardId = celebrate({
   }),
 });
 
-module.exports = { validationLogin, validationCreateUser, validationUpdateUser,validationUpdateAvatar, validationUserId, validationCreateCard, validationCardId };
+module.exports = {
+  validationLogin,
+  validationCreateUser,
+  validationUpdateUser,
+  validationUpdateAvatar,
+  validationUserId,
+  validationCreateCard,
+  validationCardId,
+};

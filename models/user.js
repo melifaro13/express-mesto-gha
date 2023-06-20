@@ -3,8 +3,6 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const AuthError = require('../errors/AuthError');
 
-const URL = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/;
-
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -22,8 +20,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
+      // eslint-disable-next-line func-names, object-shorthand
       validator: function (v) {
-        return URL.test(v);
+      // eslint-disable-next-line no-useless-escape
+        return /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(v);
       },
       message: 'Некорректный формат ссылки на аватар',
     },
@@ -40,10 +40,11 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false
-  }
+    select: false,
+  },
 });
 
+// eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {

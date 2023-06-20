@@ -1,11 +1,10 @@
-const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 const { formatUser } = require('../utils/formatUser');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
-const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -28,19 +27,31 @@ const getUser = (req, res, next) => {
       } else {
         next(err);
       }
-    })
+    });
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
   User.findOne({ email })
     .then((user) => {
       if (user) {
         throw new ConflictError('Пользователь с таким email уже зарегистрирован');
       }
       bcrypt.hash(password, 10)
-        .then((hash) => User.create({ name, about, avatar, email, password: hash }))
-        .then((user) => {
+        .then((hash) => User.create({
+          name,
+          about,
+          avatar,
+          email,
+          password: hash,
+        }))
+        .then(() => {
           res.send(formatUser(user));
         })
         .catch((err) => {
@@ -49,7 +60,7 @@ const createUser = (req, res, next) => {
           } else {
             next(err);
           }
-        })
+        });
     }).catch(next);
 };
 
@@ -70,10 +81,10 @@ const updateUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Предоставлены некорректные данные'));
       } else {
-        next(err)
+        next(err);
       }
-    })
-}
+    });
+};
 
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
@@ -92,43 +103,51 @@ const updateAvatar = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Предоставлены некорректные данные'));
       } else {
-        next(err)
+        next(err);
       }
-    })
-}
+    });
+};
 
 const getCurrentUser = (req, res, next) => {
   User.findOne({ _id: req.user._id })
-  .then((user) => {
-    if (!user) {
-      throw new NotFoundError('Пользователь не найден');
-    }
-    return res.send(formatUser(user));
-  })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      next(new BadRequestError('Предоставлены некорректные данные'));
-    } else {
-      next(err)
-    }
-  })
-}
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
+      return res.send(formatUser(user));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Предоставлены некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
+};
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
-  .then((user) => {
-    const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
-    res.cookie('jwt', token, {
-      maxAge: 3600000 * 24 * 7,
-      httpOnly: true,
-      sameSite: true
-    })
-    .send({ message: 'Авторизация прошла успешно' });
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+        sameSite: true,
+      })
+        .send({ message: 'Авторизация прошла успешно' });
     })
     .catch((err) => {
-      next(new AuthError(`Ошибка авторизации: ${err.message}`));
-  })
-}
+      next(err);
+    });
+};
 
-module.exports = { getUsers, getUser, createUser, updateUser, updateAvatar, getCurrentUser, login };
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
+  updateAvatar,
+  getCurrentUser,
+  login,
+};
