@@ -5,6 +5,7 @@ const { formatUser } = require('../utils/formatUser');
 const NotFoundError = require('../errors/NotFoundError');
 const BadRequestError = require('../errors/BadRequestError');
 const ConflictError = require('../errors/ConflictError');
+const AuthError = require('../errors/AuthError');
 
 const getUsers = (req, res, next) => {
   User.find({})
@@ -138,7 +139,7 @@ const login = (req, res, next) => {
         .send({ message: 'Авторизация прошла успешно' });
     })
     .catch((err) => {
-      next(err);
+      next(new AuthError(`Ошибка авторизации: ${err.message}`));
     });
 };
 
